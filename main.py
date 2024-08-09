@@ -1,11 +1,11 @@
 from typing_extensions import TypeVarTuple
 from fastapi import FastAPI, HTTPException
-import fastapi
+
 from pydantic import BaseModel
 from typing import List, Optional
 
 from python_on_whales import docker
-
+ 
 from libs.Port import Port
 import uuid
 import os
@@ -16,6 +16,11 @@ app = FastAPI()
 
 class Container(BaseModel):
     username: str
+
+class Container_update(BaseModel):
+    container_name: str
+    state: str
+    lst_container: Optional[List[str]]
 
 @app.post("/container")
 def create_container(data: Container):
@@ -36,7 +41,26 @@ def create_container(data: Container):
         volumes=[(folder_location, "/srv/shiny-server")]
     )
 
-    return_data = {"url":"http://202.124.198.83" + port}
+    return_data = {"url":"hpc-a100-mf.gunadarma.ac.id:" + port, "container_name": container_name, "error": False}
+
+    return return_data
+
+@app.put("/container")
+def update_container(data: Container_update):
+    if data.state == "shutdown":
+        docker.container.stop(data.container_name, time=None)
+    elif data.state == "shutdown-all":
+        docker.container.stop(data.lst_container)
+    elif data.state == "restart":
+        docker.container.restart(data.container_name, time=None)
+    elif data.state == "restart-all":
+        docker.container.restart(data.lst_container)
+    elif data.state == "remove":
+        docker.container.remove(data.container_name)
+    elif data.state == "remove-all":
+        docker.container.remove(data.lst_container)
+    
+    return_data = {"message": "Container berhasil di" + data.state}
 
     return return_data
 
