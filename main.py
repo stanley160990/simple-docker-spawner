@@ -24,8 +24,9 @@ class Container_update(BaseModel):
 
 @app.post("/container")
 def create_container(data: Container):
-    container_name = data.username + ":" + str(uuid.uuid4())
+    
     user_folder = data.username.replace('@', '_at_')
+    container_name = "albatross:" + user_folder + ":" + str(uuid.uuid4())
     folder_location = "/opt/albatross/" + user_folder + "/App"
 
     os.makedirs(folder_location, exist_ok=True)
