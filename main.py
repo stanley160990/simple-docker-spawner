@@ -18,19 +18,19 @@ class Container(BaseModel):
     username: str
 
 class Container_update(BaseModel):
-    container_name: str
+    container_name: Optional[str] = None
     state: str
-    lst_container: Optional[List[str]]
+    lst_container: Optional[List[str]] = None
 
 @app.post("/container")
 def create_container(data: Container):
     
     user_folder = data.username.replace('@', '_at_')
-    container_name = "albatross:" + user_folder + ":" + str(uuid.uuid4())
-    folder_location = "/opt/albatross/" + user_folder + "/App"
+    container_name = "albatross_" + user_folder + "_" + str(uuid.uuid4())
+    folder_location = "/raid/albatross/" + user_folder + "/App"
 
     os.makedirs(folder_location, exist_ok=True)
-    shutil.copytree("/opt/albatross/main-file", folder_location, dirs_exist_ok=True)
+    shutil.copytree("/raid/albatross/main-file", folder_location, dirs_exist_ok=True)
     
     port = str(Port().gen())
     port_asign = "0.0.0.0:" + port
@@ -57,6 +57,7 @@ def update_container(data: Container_update):
     elif data.state == "restart-all":
         docker.container.restart(data.lst_container)
     elif data.state == "remove":
+        docker.container.stop(data.container_name)
         docker.container.remove(data.container_name)
     elif data.state == "remove-all":
         docker.container.remove(data.lst_container)
@@ -66,4 +67,4 @@ def update_container(data: Container_update):
     return return_data
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")

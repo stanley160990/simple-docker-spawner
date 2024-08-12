@@ -1,14 +1,12 @@
-import socket
+from socket import socket
 
 class Port(object):
     def __init__(self) -> None:
         pass
 
     def gen(self):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.bind(('localhost', 0))
-        port = s.getsockname()[1]
-        s.listen(1)
-        s.close()
+        with socket() as s:
+            s.bind(('',0))
+            free_socket = s.getsockname()[1]
 
-        return port
+        return free_socket
