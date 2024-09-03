@@ -62,7 +62,6 @@ def generate_url(docker_url, username):
     return link
 
 def restart_nginx():
-    sudo_password = 'merdeka100persen'
     command = f'sudo -S nginx -s reload'
     subprocess.run(command, shell=True, check=True, text=True)
 
