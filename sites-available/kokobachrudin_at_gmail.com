@@ -1,12 +1,12 @@
-        location /GEN_PATH/ {
-            proxy_pass DOCKER_URL;
+        location /d3f449ef-3727-4721-8e52-eaa76179230a/ {
+            proxy_pass http://127.0.0.1:34369/;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
         }
-        location /GEN_PATH/websocket/ {
-            proxy_pass DOCKER_URLwebsocket/;
+        location /d3f449ef-3727-4721-8e52-eaa76179230a/websocket/ {
+            proxy_pass http://127.0.0.1:34369/websocket/;
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "Upgrade";

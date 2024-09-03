@@ -17,7 +17,7 @@ import subprocess
 # Master Config
 
 master_folder = "/home/albatross/simple-docker-spawner"
-master_url = "https://dgx-a100-mf.gunadarma.ac.id/"
+master_url = "https://hpc-a100-mf.gunadarma.ac.id/"
 
 app = FastAPI()
 
@@ -32,7 +32,7 @@ class Container_update(BaseModel):
 def generate_url(docker_url, username):
     random_path = str(uuid.uuid4())
     template_file = "template/nginx-config-template"
-    site_enable = "/etc/nginx/site-enabled"
+    site_enable = "/etc/nginx/sites-enabled"
 
     replacements= {
         'GEN_PATH' : random_path,
@@ -47,12 +47,15 @@ def generate_url(docker_url, username):
         content = content.replace(old_string, new_string)
 
     # Write the updated content back to the file
-    target_path = master_folder + "/site-available/" + username
+    target_path = master_folder + "/sites-available/" + username
     nginx_path = site_enable + "/" + username
     with open(target_path, 'w') as file:
         file.write(content)
 
-    os.symlink(target_path, nginx_path)
+    # os.symlink(target_path, nginx_path)
+    
+    # command = f'sudo ln -s {target_path} {nginx_path}'
+    # subprocess.run(command, shell=True, check=True, text=True)
 
     link = master_url + random_path
 
@@ -60,7 +63,7 @@ def generate_url(docker_url, username):
 
 def restart_nginx():
     sudo_password = 'merdeka100persen'
-    command = f'echo {sudo_password} | sudo -S nginx -s reload'
+    command = f'sudo -S nginx -s reload'
     subprocess.run(command, shell=True, check=True, text=True)
 
     return True
@@ -88,7 +91,7 @@ def create_container(data: Container):
     docker_url = 'http://127.0.0.1:' + port + "/"
     link = generate_url(docker_url, user_folder)
     restart_nginx()
-    return_data = {"url":"hpc-a100-mf.gunadarma.ac.id:" + port, "container_name": container_name, "error": False}
+    return_data = {"url":link, "container_name": container_name, "error": False}
 
     return return_data
 
