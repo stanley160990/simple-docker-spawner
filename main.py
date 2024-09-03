@@ -11,6 +11,13 @@ import uuid
 import os
 import shutil
 import uvicorn
+import uuid
+import os
+import subprocess
+# Master Config
+
+master_folder = "/home/albatross/simple-docker-spawner"
+master_url = "https://dgx-a100-mf.gunadarma.ac.id/"
 
 app = FastAPI()
 
@@ -21,6 +28,42 @@ class Container_update(BaseModel):
     container_name: Optional[str] = None
     state: str
     lst_container: Optional[List[str]] = None
+
+def generate_url(docker_url, username):
+    random_path = str(uuid.uuid4())
+    template_file = "template/nginx-config-template"
+    site_enable = "/etc/nginx/site-enabled"
+
+    replacements= {
+        'GEN_PATH' : random_path,
+        'DOCKER_URL': docker_url
+    }
+    # Open the file, read its contents, replace the strings, and save the file
+    with open(template_file, 'r') as file:
+        content = file.read()
+
+    # Replace each old string with its corresponding new string
+    for old_string, new_string in replacements.items():
+        content = content.replace(old_string, new_string)
+
+    # Write the updated content back to the file
+    target_path = master_folder + "/site-available/" + username
+    nginx_path = site_enable + "/" + username
+    with open(target_path, 'w') as file:
+        file.write(content)
+
+    os.symlink(target_path, nginx_path)
+
+    link = master_url + random_path
+
+    return link
+
+def restart_nginx():
+    sudo_password = 'merdeka100persen'
+    command = f'echo {sudo_password} | sudo -S nginx -s reload'
+    subprocess.run(command, shell=True, check=True, text=True)
+
+    return True
 
 @app.post("/container")
 def create_container(data: Container):
@@ -41,7 +84,10 @@ def create_container(data: Container):
         detach=True,
         volumes=[(folder_location, "/srv/shiny-server")]
     )
-
+    
+    docker_url = 'http://127.0.0.1:' + port + "/"
+    link = generate_url(docker_url, user_folder)
+    restart_nginx()
     return_data = {"url":"hpc-a100-mf.gunadarma.ac.id:" + port, "container_name": container_name, "error": False}
 
     return return_data
