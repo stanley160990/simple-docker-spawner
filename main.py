@@ -101,7 +101,7 @@ def update_container(data: Container_update):
         docker.container.restart(data.lst_container)
     elif data.state == "remove":
         lst_container_name = data.container_name.split("_")
-        username = ''.join(lst_container_name[1:-1])
+        username = '_'.join(lst_container_name[1:-1])
         docker.container.stop(data.container_name)
         docker.container.remove(data.container_name)
         os.remove('sites-available/'+ username)
@@ -109,7 +109,7 @@ def update_container(data: Container_update):
         docker.container.remove(data.lst_container)
         for isian_data in data.lst_container:
             lst_container_name = isian_data.split("_")
-            username = ''.join(lst_container_name[1:-1])
+            username = '_'.join(lst_container_name[1:-1])
             os.remove('sites-available/' + username)
     return_data = {"message": "Container berhasil di" + data.state}
 
