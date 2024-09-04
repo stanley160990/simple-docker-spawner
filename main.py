@@ -52,11 +52,6 @@ def generate_url(docker_url, username):
     with open(target_path, 'w') as file:
         file.write(content)
 
-    # os.symlink(target_path, nginx_path)
-    
-    # command = f'sudo ln -s {target_path} {nginx_path}'
-    # subprocess.run(command, shell=True, check=True, text=True)
-
     link = master_url + random_path
 
     return link
@@ -105,11 +100,16 @@ def update_container(data: Container_update):
     elif data.state == "restart-all":
         docker.container.restart(data.lst_container)
     elif data.state == "remove":
+        lst_container_name = data.container_name.split("-")
+        username = ''.join(lst_container_name[1:-1])
         docker.container.stop(data.container_name)
         docker.container.remove(data.container_name)
+        os.remove('sites-available/'+ username)
     elif data.state == "remove-all":
         docker.container.remove(data.lst_container)
-    
+        for isian_data in data.lst_container:
+            username = ''.join(isian_data[1:-1])
+            os.remove('sites-available/' + username)
     return_data = {"message": "Container berhasil di" + data.state}
 
     return return_data
