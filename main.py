@@ -105,12 +105,14 @@ def update_container(data: Container_update):
         docker.container.stop(data.container_name)
         docker.container.remove(data.container_name)
         os.remove('sites-available/'+ username)
+        restart_nginx()
     elif data.state == "remove-all":
         docker.container.remove(data.lst_container)
         for isian_data in data.lst_container:
             lst_container_name = isian_data.split("_")
             username = '_'.join(lst_container_name[1:-1])
             os.remove('sites-available/' + username)
+        restart_nginx()
     return_data = {"message": "Container berhasil di" + data.state}
 
     return return_data
